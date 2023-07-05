@@ -1,4 +1,3 @@
-# fidam-eval
-Code for the ACL Findings paper "Feature Interactions Reveal Linguistic Structure in Language Models"
+# Feature Interactions Reveal Linguistic Structure in Language Models
 
-_I'll add the code here ASAP, need to find some time to clean up the code base first._
+![Schematic overview of the paper methodology](figures/pipeline.png)
