@@ -1,13 +1,6 @@
 import torch
 
-
-def flatten(container):
-    for i in container:
-        if isinstance(i, (list, tuple)):
-            for j in flatten(i):
-                yield j
-        else:
-            yield i
+from fidameval.utils import flatten
 
 
 def group_ablation(
@@ -21,10 +14,9 @@ def group_ablation(
     discard=False,
     background_distribution=None,
     num_marginal_samples=1,
-    use_positional_prior=False,
 ):
     if coalitions is None:
-        coalitions = [[idx] for idx in range(len(input_ids))]
+        coalitions = [[idx] for idx in range(input_ids.shape[-1])]
 
     ablation_matrix = torch.zeros(len(coalitions), len(coalitions))
 
@@ -45,15 +37,14 @@ def group_ablation(
                     input_ids,
                     coal_ij,
                     num_marginal_samples=num_marginal_samples,
-                    use_positional_prior=use_positional_prior,
                 )
                 mixed_input = torch.stack(mixed_input)
             elif keep:
                 mixed_input = torch.clone(baseline_ids)
-                mixed_input[:, coal_ij] = input_ids[:, coal_ij]
+                mixed_input[coal_ij] = input_ids[coal_ij]
             else:
                 mixed_input = torch.clone(input_ids)
-                mixed_input[:, coal_ij] = baseline_ids[:, coal_ij]
+                mixed_input[coal_ij] = baseline_ids[coal_ij]
 
             with torch.no_grad():
                 if not use_embs:

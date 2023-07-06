@@ -31,3 +31,13 @@ def unpad_sequence(tensor, lengths):
     tensor_list = [value for row, idx in zip(tensor, lengths) for value in row[:idx]]
 
     return concat_fn(tensor_list).to(DEVICE)
+
+
+def flatten(container):
+    """ Flatten iterator of iterators to single iterator. """
+    for i in container:
+        if isinstance(i, (list, tuple)):
+            for j in flatten(i):
+                yield j
+        else:
+            yield i

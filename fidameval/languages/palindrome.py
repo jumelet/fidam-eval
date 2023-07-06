@@ -41,7 +41,10 @@ class Palindrome(Language):
 
     @property
     def num_symbols(self):
-        return self.config.n_items * (1 + self.config.map_homomorphic) + self.config.use_separator
+        return (
+            self.config.n_items * (1 + self.config.map_homomorphic)
+            + self.config.use_separator
+        )
 
     def create_corpus(self) -> Corpus:
         all_corpora = [

@@ -1,6 +1,7 @@
 import torch
-from path_explain import EmbeddingExplainerTorch
 from torch import Tensor
+
+from .path_explain import EmbeddingExplainerTorch
 
 
 def model_forward(model):

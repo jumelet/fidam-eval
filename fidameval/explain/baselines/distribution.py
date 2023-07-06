@@ -1,3 +1,4 @@
+import warnings
 from collections import defaultdict
 from typing import *
 
@@ -39,9 +40,19 @@ class Distribution:
     def create_len_distribution(
         self, label: int, max_sen_len: Optional[int] = None
     ) -> Dict[int, Tensor]:
-        label_items = [
-            item for item, item_label in self.language.corpus if item_label == label
-        ]
+        """Creates dict that maps each sentence length to all corpus
+        items of that length.
+        """
+        if self.language.config.is_binary:
+            label_items = [
+                item for item, item_label in self.language.corpus if item_label == label
+            ]
+        else:
+            if label == 0:
+                warnings.warn(
+                    "Corpus contains no negative items for negative corpus distribution"
+                )
+            label_items = self.language.corpus
         len_distribution: Dict[int, List[Tensor]] = defaultdict(list)
         for item in label_items:
             if max_sen_len is None or len(item) <= max_sen_len:
@@ -57,15 +68,18 @@ class Distribution:
         self,
         corpus: List[Tuple[Tensor, int]],
     ) -> Dict[int, np.array]:
-        max_sen_len = max([len(x) for x, _ in corpus])
+        if self.language.config.is_binary:
+            base_corpus = [x for x, label in corpus if label == 1]
+        else:
+            base_corpus = corpus
+
+        max_sen_len = max(map(len, base_corpus))
+
         distribution_dict = {
             idx: np.zeros(self.language.num_symbols) for idx in range(max_sen_len)
         }
 
-        for item, label in corpus:
-            if label == 0:
-                continue
-
+        for item in base_corpus:
             for idx, symbol in enumerate(item.tolist()):
                 distribution_dict[idx][symbol] += 1
 

@@ -1,4 +1,8 @@
-import torch
+""" Methods for computing the true dependency relations of interest. """
+
+
+def gen_fe_deps(_):
+    return [(0, 1)]
 
 
 def gen_dyck_deps(input_list):
@@ -9,33 +13,13 @@ def gen_dyck_deps(input_list):
             stack.append((idx, x))
         else:
             prev_idx, y = stack.pop()
-            assert (x - 2) == y, "string not well formed"
+            assert (x - 2) == y, f"string not well formed: {input_list}"
             deps.append((prev_idx, idx))
 
     return deps
 
 
-def gen_fe_deps(_):
-    return [(0, 1)]
-
-
-def gen_palin_deps(input_list):
+def gen_palindrome_deps(input_list):
     sen_len = len(input_list)
 
     return [(i, sen_len - i - 1) for i in range(sen_len // 2)]
-
-
-def invert_dyck(item):
-    return torch.tensor([{0: 1, 1: 0, 2: 3, 3: 2}[x.item()] for x in item])
-
-
-def invert_palin(item, n_items):
-    new_item = []
-
-    for idx, sym in enumerate(item):
-        if idx < len(item) // 2:
-            new_item.append((sym + 1) % n_items)
-        else:
-            new_item.append((sym + 1) % n_items + n_items)
-
-    return torch.tensor(new_item)

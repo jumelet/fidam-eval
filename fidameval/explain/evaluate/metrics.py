@@ -1,6 +1,18 @@
+from typing import Dict
+
 import numpy as np
 import torch
 from sklearn.metrics import ndcg_score
+
+
+def calc_all_metrics(interactions, deps) -> Dict[str, float]:
+    score_dict = {
+        "pos": deps_pos(interactions, deps),
+        "ndcg": row_ndcg(interactions, deps),
+        "row_rank": row_ranks(interactions, deps),
+    }
+
+    return score_dict
 
 
 def deps_pos(interactions, deps):
@@ -9,33 +21,6 @@ def deps_pos(interactions, deps):
     pos_ids = set(zip(*pos_ids))
 
     return len(set(deps) & pos_ids) / len(deps)
-
-
-def mean_rank(interactions, deps):
-    """Returns the rank of each dependency interaction based on interaction scores
-
-    A perfect ordering would have ranks [0, 1, 2, ...]
-    The ranks are normalised between 0 and 1 (1 being best)
-    """
-    sorted_ids = np.argsort(-interactions.flatten().numpy())
-
-    n = interactions.shape[0]
-    sorted_ids = [tuple(sorted((i % n, i // n))) for i in sorted_ids if i % n <= i // n]
-
-    ranks = [sorted_ids.index(dep) for dep in deps]
-
-    total = len(sorted_ids)
-
-    mean_ranks = np.mean(ranks)
-    num_deps = len(deps)
-    # Scale between 0 and 1
-    norm_rank = (
-        (mean_ranks - ((num_deps - 1) / 2))
-        * ((total - 1) / (total - num_deps))
-        / (total - 1)
-    )
-
-    return 1 - norm_rank
 
 
 def row_ndcg(interactions, deps):

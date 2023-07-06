@@ -2,8 +2,9 @@ import random
 from typing import *
 
 import torch
-from baseline import Baseline
 from torch import Tensor
+
+from .baseline import Baseline
 
 
 class DyckBaseline(Baseline):
@@ -25,7 +26,9 @@ class DyckBaseline(Baseline):
                 if idx in remaining_ids:
                     baseline.append(input_ids[idx].item())
                 else:
-                    candidate_ids = list(set(range(4)) - {input_ids[idx].item()})
+                    candidate_ids = list(
+                        set(range(self.language.num_symbols)) - {input_ids[idx].item()}
+                    )
                     if use_positional_prior:
                         weights = self.distribution.positional[idx][candidate_ids]
                         symbol = random.choices(candidate_ids, weights=weights)[0]
@@ -73,7 +76,8 @@ class DyckBaseline(Baseline):
         memoise = {0: [""], 1: ["aA", "bB"]}
 
         strings = self.gen_dyck_rec(n, memoise)
-        tokenized = [[self.language.token2idx[x] for x in item] for item in strings]
+        translate = {"a": 0, "b": 1, "A": 2, "B": 3}
+        tokenized = [[translate[x] for x in item] for item in strings]
 
         return torch.tensor(tokenized)
 
@@ -93,6 +97,17 @@ class DyckBaseline(Baseline):
 
         return memoise[n]
 
-    @staticmethod
-    def invert(input_ids):
-        return torch.tensor([{0: 1, 1: 0, 2: 3, 3: 2}[x.item()] for x in input_ids])
+    def invert(self, input_ids):
+        n_items = self.language.config.n_items
+        translation_dict = {}
+        for idx in range(n_items * 2):
+            if idx < n_items:
+                translation_dict[idx] = (idx + 1) % n_items
+            else:
+                translation_dict[idx] = ((idx + 1) % n_items) + n_items
+
+        baseline_ids = torch.tensor(
+            [translation_dict[x.item()] for x in input_ids.squeeze()]
+        )
+
+        return baseline_ids

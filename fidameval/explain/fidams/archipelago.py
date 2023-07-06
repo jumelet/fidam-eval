@@ -1,11 +1,8 @@
-import sys
-
-sys.path.append("../../archipelago/src")
 import itertools
 
 import torch
-from application_utils.text_utils import *
-from explainer import Archipelago
+
+from .archipelago_src import Archipelago, TextXformer
 
 
 class ModelWrapperTorch:

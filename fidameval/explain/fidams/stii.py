@@ -1,5 +1,5 @@
 import multiprocessing
-from itertools import chain, combinations, product
+from itertools import chain, combinations
 from math import comb, factorial
 
 import torch
@@ -7,7 +7,6 @@ from tqdm import *
 
 
 def powerset(iterable):
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
@@ -49,7 +48,6 @@ def stii(
     batch_size=1024,
     verbose=False,
     background_distribution=None,
-    use_positional_prior=False,
     num_marginal_samples=1,
     processes=1,
 ):
@@ -80,7 +78,7 @@ def stii(
                 input_matrix[idx, complement] = baseline_ids[complement]
             else:
                 input_matrix[idx] = background_distribution(
-                    input_ids, S, use_positional_prior=use_positional_prior
+                    input_ids, S, num_marginal_samples=1
                 )[0]
 
         with torch.no_grad():

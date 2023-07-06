@@ -58,3 +58,15 @@ def palin_interventional(
         baselines.append(torch.tensor(baseline))
 
     return baselines
+
+
+def invert_palin(item, n_items):
+    new_item = []
+
+    for idx, sym in enumerate(item):
+        if idx < len(item) // 2:
+            new_item.append((sym + 1) % n_items)
+        else:
+            new_item.append((sym + 1) % n_items + n_items)
+
+    return torch.tensor(new_item)
